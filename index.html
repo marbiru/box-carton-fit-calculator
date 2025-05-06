@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Box Fitting Calculator</title>
+  <script async defer data-domain="marbiru.com" src="https://plausible.io/js/plausible.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2em auto;
+      padding: 1em;
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      margin: 0.5em 0 0.2em;
+    }
+    input[type="number"] {
+      width: 5em;
+      padding: 0.3em;
+      margin-right: 1em;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+    }
+    pre {
+      background: #f0f0f0;
+      padding: 1em;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Box in Carton Fitter</h1>
+  <form id="dimension-form">
+    <fieldset>
+      <legend>Box Dimensions</legend>
+      <label>Length <input type="number" id="box-l" required></label>
+      <label>Width <input type="number" id="box-w" required></label>
+      <label>Height <input type="number" id="box-h" required></label>
+    </fieldset>
+    <fieldset>
+      <legend>Carton Dimensions</legend>
+      <label>Length <input type="number" id="carton-l" required></label>
+      <label>Width <input type="number" id="carton-w" required></label>
+      <label>Height <input type="number" id="carton-h" required></label>
+    </fieldset>
+    <button type="submit">Calculate</button>
+  </form>
+
+  <h2>Results</h2>
+  <pre id="results"></pre>
+
+  <footer style="margin-top: 3em; font-size: 0.9em">
+    Made by <a href="https://uribram.com" target="_blank">Uri Bram</a>, vibe coded by <a href="https://openai.com/chatgpt" target="_blank">ChatGPT 4o</a>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function getInput(id) {
+        const val = parseFloat(document.getElementById(id).value);
+        if (isNaN(val) || val <= 0) throw new Error(`Invalid input for ${id}`);
+        return val;
+      }
+
+      document.getElementById('dimension-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const results = document.getElementById('results');
+        try {
+          const box = [
+            getInput('box-l'),
+            getInput('box-w'),
+            getInput('box-h')
+          ];
+          const carton = [
+            getInput('carton-l'),
+            getInput('carton-w'),
+            getInput('carton-h')
+          ];
+
+          const orientations = [
+            [box[0], box[1], box[2]],
+            [box[0], box[2], box[1]],
+            [box[1], box[0], box[2]],
+            [box[1], box[2], box[0]],
+            [box[2], box[0], box[1]],
+            [box[2], box[1], box[0]],
+          ];
+
+          let output = '';
+          let bestFit = 0;
+
+          orientations.forEach((orientation, i) => {
+            const fit = orientation.map((dim, idx) => Math.floor(carton[idx] / dim));
+            const count = fit.reduce((a, b) => a * b, 1);
+            output += `Orientation ${i+1} (${orientation.join(' x ')}): ${fit.join(' x ')} = ${count} boxes\n`;
+            bestFit = Math.max(bestFit, count);
+          });
+
+          output += `\nBest fit: ${bestFit} boxes`;
+          results.textContent = output;
+        } catch (err) {
+          results.textContent = `Error: ${err.message}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
