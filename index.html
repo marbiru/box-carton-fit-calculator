@@ -36,18 +36,20 @@
 <body>
   <h1>Box in Carton Fitter</h1>
   <form id="dimension-form">
-    <fieldset>
-      <legend>Box Dimensions</legend>
-      <label>Length <input type="number" id="box-l" required></label>
-      <label>Width <input type="number" id="box-w" required></label>
-      <label>Height <input type="number" id="box-h" required></label>
-    </fieldset>
-    <fieldset>
-      <legend>Carton Dimensions</legend>
-      <label>Length <input type="number" id="carton-l" required></label>
-      <label>Width <input type="number" id="carton-w" required></label>
-      <label>Height <input type="number" id="carton-h" required></label>
-    </fieldset>
+    <div style="display: flex; gap: 2em; flex-wrap: wrap;">
+      <fieldset>
+        <legend>Box Dimensions</legend>
+        <label>Length <input type="number" id="box-l" required value="1"></label>
+        <label>Width <input type="number" id="box-w" required value="2"></label>
+        <label>Height <input type="number" id="box-h" required value="3"></label>
+      </fieldset>
+      <fieldset>
+        <legend>Carton Dimensions</legend>
+        <label>Length <input type="number" id="carton-l" required value="7"></label>
+        <label>Width <input type="number" id="carton-w" required value="8"></label>
+        <label>Height <input type="number" id="carton-h" required value="9"></label>
+      </fieldset>
+    </div>
     <button type="submit">Calculate</button>
   </form>
 
@@ -55,7 +57,7 @@
   <pre id="results"></pre>
 
   <footer style="margin-top: 3em; font-size: 0.9em">
-    Made by <a href="https://uribram.com" target="_blank">Uri Bram</a>, vibe coded by <a href="https://openai.com/chatgpt" target="_blank">ChatGPT 4o</a>
+    Made by <a href="https://uribram.com" target="_blank">Uri Bram</a> on 2025-05-06, vibe coded by <a href="https://openai.com/chatgpt" target="_blank">ChatGPT 4o</a>
   </footer>
 
   <script>
@@ -90,21 +92,33 @@
             [box[2], box[1], box[0]],
           ];
 
+          const boxVolume = box[0] * box[1] * box[2];
+          const cartonVolume = carton[0] * carton[1] * carton[2];
+
           let output = '';
           let bestFit = 0;
+          let bestOrientation = null;
 
           orientations.forEach((orientation, i) => {
             const fit = orientation.map((dim, idx) => Math.floor(carton[idx] / dim));
             const count = fit.reduce((a, b) => a * b, 1);
             output += `Orientation ${i+1} (${orientation.join(' x ')}): ${fit.join(' x ')} = ${count} boxes\n`;
-            bestFit = Math.max(bestFit, count);
+            if (count > bestFit) {
+              bestFit = count;
+              bestOrientation = orientation;
+            }
           });
 
+          const usedVolume = bestFit * boxVolume;
+          const efficiency = ((usedVolume / cartonVolume) * 100).toFixed(2);
+
           output += `\nBest fit: ${bestFit} boxes`;
+          output += `\nVolume efficiency: ${efficiency}%`;
+
           results.textContent = output;
         } catch (err) {
           results.textContent = `Error: ${err.message}`;
-        }
+        }w
       });
     });
   </script>
